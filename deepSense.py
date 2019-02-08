@@ -1,38 +1,26 @@
 from layer import common
 
 def sensor_local_conv(inputs, train, name):
-    conv1 = common.conv_with_dropout(inputs, name=name+"_1", train, 64, kernel_size=[1, 18], strides=[1, 6], dropout_prob = 0.8)
-    conv2 = common.conv_with_dropout(conv1, name=name+"_2", train, 64, kernel_size=[1, 3], strides=[1, 1], dropout_prob = 0.8)
-    conv3 = common.conv_without_dropout(conv1, name=name+"_3", train, 64, kernel_size=[1, 3], strides=[1, 1])
+    conv1 = common.conv_with_dropout(inputs, name=name+"_1", train, 64, kernel_size=[1, 18], 
+		strides=[1, 6], padding='VALID', data_format='NHWC', dropout_prob = 0.8)
+    conv2 = common.conv_with_dropout(conv1, name=name+"_2", train, 64, kernel_size=[1, 3], 
+		strides=[1, 1], padding='VALID', data_format='NHWC', dropout_prob = 0.8)
+    conv3 = common.conv(conv2, name=name+"_3", train, 64, kernel_size=[1, 3], strides=[1, 1], 
+		padding='VALID', data_format='NHWC')
     conv3_shape = conv3.get_shape().as_list()
     conv_out = tf.reshape(conv3, [conv3_shape[0], conv3_shape[1], 1, conv3_shape[2], conv3_shape[3]])
     return conv_out
 
-
-def merge_conv_without_dropout(inputs, name, train, conv_num, kernel_size, strides):
-	conv = layers.convolution2d(inputs, conv_num, kernel_size=kernel_size,
-			stride=strides, padding='SAME', activation_fn=None, data_format='NDHWC', scope=name+"_conv")
-    conv = batch_norm_layer(conv, train, scope=name+'_BN')
-	conv = tf.nn.relu(conv)
-    return conv
-
-def merge_conv_with_dropout(inputs, name, train, conv_num, kernel_size, strides, dropout_prob):
-    conv = merge_conv_without_dropout(inputs, name, train, conv_num, kernel_size, strides)
-	conv_shape = conv.get_shape().as_list()
-	conv = layers.dropout(conv, dropout_prob, is_training=train,
-			noise_shape=[conv_shape[0], 1, 1, 1, conv_shape[4]], scope=name+'_dropout')
-    return conv
-
 def merge_conv(inputs, train, name):
-    conv1 = common.merge_conv_with_dropout(inputs, name=name+"_1", train, 64, kernel_size=[1, 2, 8], strides=[1, 1, 1], dropout_prob = 0.8)
-    conv2 = common.merge_conv_with_dropout(conv1, name=name+"_2", train, 64, kernel_size=[1, 2, 6], strides=[1, 1, 1], dropout_prob = 0.8)
-    conv3 = common.merge_conv_without_dropout(conv2, name=name+"_3", train, 64, kernel_size=[1, 2, 4], strides=[1, 1, 1])
-	conv3_shape = conv3.get_shape().as_list()
-	conv_out = tf.reshape(conv3, [conv3_shape[0], conv3_shape[1], conv3_shape[2]*conv3_shape[3]*conv3_shape[4]])
+    conv1 = common.conv_with_dropout(inputs, name=name+"_1", train, 64, kernel_size=[1, 2, 8], 
+		strides=[1, 1, 1], padding='SAME', data_format='NDHWC', dropout_prob = 0.8)
+    conv2 = common.conv_with_dropout(conv1, name=name+"_2", train, 64, kernel_size=[1, 2, 6], 
+		strides=[1, 1, 1], padding='SAME', data_format='NDHWC', dropout_prob = 0.8)
+    conv3 = common.conv(conv2, name=name+"_3", train, 64, kernel_size=[1, 2, 4], strides=[1, 1], 
+		padding='SAME`', data_format='NDHWC')
+    conv3_shape = conv3.get_shape().as_list()
+    conv_out = tf.reshape(conv3, [conv3_shape[0], conv3_shape[1], conv3_shape[2] * conv3_shape[3] * conv3_shape[4]])
     return conv_out
-
-
-
 
 def deepSense(inputs, train, reuse=False, name='deepSense'):
 	with tf.variable_scope(name, reuse=reuse) as scope:
@@ -69,4 +57,26 @@ def deepSense(inputs, train, reuse=False, name='deepSense'):
 
 		return logits
 
+
+# def merge_conv_without_dropout(inputs, name, train, conv_num, kernel_size, strides):
+# 	conv = layers.convolution2d(inputs, conv_num, kernel_size=kernel_size,
+# 			stride=strides, padding='SAME', activation_fn=None, data_format='NDHWC', scope=name+"_conv")
+#     conv = batch_norm_layer(conv, train, scope=name+'_BN')
+# 	conv = tf.nn.relu(conv)
+#     return conv
+
+# def merge_conv_with_dropout(inputs, name, train, conv_num, kernel_size, strides, dropout_prob):
+#     conv = merge_conv_without_dropout(inputs, name, train, conv_num, kernel_size, strides)
+# 	conv_shape = conv.get_shape().as_list()
+# 	conv = layers.dropout(conv, dropout_prob, is_training=train,
+# 			noise_shape=[conv_shape[0], 1, 1, 1, conv_shape[4]], scope=name+'_dropout')
+#     return conv
+
+# def merge_conv(inputs, train, name):
+#     conv1 = common.merge_conv_with_dropout(inputs, name=name+"_1", train, 64, kernel_size=[1, 2, 8], strides=[1, 1, 1], dropout_prob = 0.8)
+#     conv2 = common.merge_conv_with_dropout(conv1, name=name+"_2", train, 64, kernel_size=[1, 2, 6], strides=[1, 1, 1], dropout_prob = 0.8)
+#     conv3 = common.merge_conv_without_dropout(conv2, name=name+"_3", train, 64, kernel_size=[1, 2, 4], strides=[1, 1, 1])
+# 	conv3_shape = conv3.get_shape().as_list()
+# 	conv_out = tf.reshape(conv3, [conv3_shape[0], conv3_shape[1], conv3_shape[2]*conv3_shape[3]*conv3_shape[4]])
+#     return conv_out
 

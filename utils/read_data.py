@@ -1,4 +1,7 @@
-def read_audio_csv(filename_queue):
+import os
+import tensorflow as tf 
+
+def read_audio_csv(filename_queue, wide, feature_dim, out_dim):
 	reader = tf.TextLineReader()
 	key, value = reader.read(filename_queue)
 	defaultVal = [[0.] for idx in range(WIDE*FEATURE_DIM + OUT_DIM)]

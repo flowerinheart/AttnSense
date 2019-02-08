@@ -1,3 +1,9 @@
+import math
+from utils import plot
+import os
+import numpy as np
+from .deepSense import deepSense
+
 BATCH_SIZE = 64
 TRAIN_SIZE = 119080
 EVAL_DATA_SIZE = 1193
@@ -71,4 +77,6 @@ def run_model(model, train, name):
 
 
 
+if __name__ == '__main__':
+	run_model(deepSense, true, 'deepsense')
 
